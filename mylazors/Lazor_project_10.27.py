@@ -86,6 +86,7 @@ def read_file (file_name):
             board[l[1]][l[0]] = "L"
         for p in P_list:
             board[p[1]][p[0]] = "P"
+        print(board)
         # print(A_num, B_num, C_num, L_list, P_list, board_list)
     return A_num, B_num, C_num, L_point, L_direction, P_list, board_list, board
 
@@ -126,26 +127,32 @@ class Block:
         output:
         The new x and y direction of lazor
         '''
-        new_la_x = 0
-        new_la_y = 0
+        
         if self.b_type == "A":
             if face == "1" or face == "2":
-                new_la_x = lazor_x
-                new_la_y = (-1) * lazor_y
+                new_la_x1 = lazor_x
+                new_la_y1 = (-1) * lazor_y
             elif face == "3" or face == "4":
-                new_la_x = (-1) * lazor_x
-                new_la_y = lazor_y
+                new_la_x1 = (-1) * lazor_x
+                new_la_y1 = lazor_y
+            new_la_x2 = 0
+            new_la_y2 = 0
         elif self.b_type == "B":
-            new_la_x = 0
-            new_la_y = 0
+            new_la_x1 = 0
+            new_la_y1 = 0
+            new_la_x1 = 0
+            new_la_y2 = 0
         elif self.b_type == "C":
             if face == "1" or face == "2":
-                new_la_x = lazor_x
-                new_la_y = (-1) * lazor_y
+                new_la_x1 = lazor_x
+                new_la_y1 = (-1) * lazor_y
             elif face == "3" or face == "4":
-                new_la_x = (-1) * lazor_x
-                new_la_y = lazor_y
-        return new_la_x, new_la_y
+                new_la_x1 = (-1) * lazor_x
+                new_la_y1 = lazor_y
+            new_la_x2 = lazor_x
+            new_la_y2 = lazor_y
+
+        return new_la_x1, new_la_y1, new_la_x2, new_la_y2
 
 
 class Lazor:
@@ -244,16 +251,16 @@ class Lazor:
 
         return path
 
-
-read_file('yarn_5.bff')
-start = read_file('yarn_5.bff')[3]
-direction = read_file('yarn_5.bff')[4]
-board1 = read_file('yarn_5.bff')[7]
+test = 'mad_7.bff'
+read_file(test)
+# start = read_file(test)[3]
+# direction = read_file(test)[4]
+# board1 = read_file(test)[7]
 
 # print(direction)
 # print(start)
-Block([7,3], "B").add_block(board1)
-print(board1)
-print(Lazor(start[0], direction[0][0], direction[0][1]).lazor_path(board1))
+# Block([7,3], "A").add_block(board1)
+# print(board1)
+# print(Lazor(start[0],direction[0][0], direction[0][1]).lazor_path(board1))
 # read_file('tiny_5.bff')
 # print(read_file('dark_1.bff'))
