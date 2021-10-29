@@ -1,3 +1,4 @@
+import copy
 # Lazor project
 # 0: Free to place
 # 1: Block A
@@ -86,7 +87,6 @@ def read_file (file_name):
             board[l[1]][l[0]] = "L"
         for p in P_list:
             board[p[1]][p[0]] = "P"
-        print(board)
         # print(A_num, B_num, C_num, L_list, P_list, board_list)
     return A_num, B_num, C_num, L_point, L_direction, P_list, board_list, board
 
@@ -140,7 +140,7 @@ class Block:
         elif self.b_type == "B":
             new_la_x1 = 0
             new_la_y1 = 0
-            new_la_x1 = 0
+            new_la_x2 = 0
             new_la_y2 = 0
         elif self.b_type == "C":
             if face == "1" or face == "2":
@@ -196,66 +196,86 @@ class Lazor:
 
     def lazor_path(self, board):
         start = self.start_point
-        path = [start]
-        dir_x = self.dir_x
-        dir_y = self.dir_x
-        dir_x1 = dir_x
-        dir_y1 = dir_y
-        while True:
-            curr_pos = path[-1]
-            new_x = curr_pos[0] + dir_x1
-            new_y = curr_pos[1] + dir_y1
-            if self.pos_chk(new_x, new_y, len(board[0]), len(board)):
-                if board[curr_pos[1]][curr_pos[0]] == "0" or board[curr_pos[1]][curr_pos[0]] == "L" \
-                        or board[curr_pos[1]][curr_pos[0]] == "P":
-                    # if the current position of the lazor is not on the side of a block.
-                    # the lazor can be longer for one step.
-                    path.append([new_x, new_y])
-                else:
-                    block_type = 0
-                    block_position = 0
-                    # if self.out_block(curr_pos[0], curr_pos[1], new_x, new_y, board):
-                    if board[curr_pos[1]][curr_pos[0]] == "1":
-                        block_position = [curr_pos[0], curr_pos[1] + 1]
-                        block_type = board[block_position[1]][block_position[0]] 
-                    elif board[curr_pos[1]][curr_pos[0]] == "2":
-                        block_position = [curr_pos[0], curr_pos[1] - 1]
-                        block_type = board[block_position[1]][block_position[0]]
-                    elif board[curr_pos[1]][curr_pos[0]] == "3":
-                        block_position = [curr_pos[0] + 1, curr_pos[1]]
-                        block_type = board[block_position[1]][block_position[0]]
-                    elif board[curr_pos[1]][curr_pos[0]] == "4":
-                        block_position = [curr_pos[0] - 1, curr_pos[1]]
-                        block_type = board[block_position[1]][block_position[0]]
-                    # else:
-                    #     # If the lazor will go through a block, then the lazor will stop.
-                    #     break
-                    # Using the Block class to figure out the new direction of the lazor after striking.
-                    new_dir_x, new_dir_y = Block(block_position, block_type).prop(dir_x1, dir_y1, board[curr_pos[1]][curr_pos[0]])
-                    dir_x1 = new_dir_x
-                    dir_y1 = new_dir_y
-                    if dir_x1 != 0 and dir_y1 != 0:
-                        new_x = curr_pos[0] + dir_x1
-                        new_y = curr_pos[1] + dir_y1
-                        path.append([new_x, new_y])
+        path_list = [[start]]
+        dir_x1 = self.dir_x
+        dir_y1 = self.dir_y
+        for p in path_list:
+            print(p)
+            while True:
+                if p[-1] != "end":
+                    curr_pos = p[-1]
+                    if len(p) >= 2:
+                        dir_x1 = p[-1][0] - p[-2][0]
+                        dir_y1 = p[-1][1] - p[-2][1]
+                    print([dir_x1, dir_y1])
+                    new_x = curr_pos[0] + dir_x1
+                    new_y = curr_pos[1] + dir_y1
+                    if self.pos_chk(new_x, new_y, len(board[0]), len(board)):
+                        print('p1')
+                        if board[curr_pos[1]][curr_pos[0]] == "0" or board[curr_pos[1]][curr_pos[0]] == "L" \
+                                or board[curr_pos[1]][curr_pos[0]] == "P":
+                            print('p2')
+                            # if the current position of the lazor is not on the side of a block.
+                            # the lazor can be longer for one step.
+                            p.append([new_x, new_y])
+                        else:
+                            print('p2else')
+                            block_type = 0
+                            block_position = 0
+                            # if self.out_block(curr_pos[0], curr_pos[1], new_x, new_y, board):
+                            if board[curr_pos[1]][curr_pos[0]] == "1":
+                                block_position = [curr_pos[0], curr_pos[1] + 1]
+                                block_type = board[block_position[1]][block_position[0]]
+                            elif board[curr_pos[1]][curr_pos[0]] == "2":
+                                block_position = [curr_pos[0], curr_pos[1] - 1]
+                                block_type = board[block_position[1]][block_position[0]]
+                            elif board[curr_pos[1]][curr_pos[0]] == "3":
+                                block_position = [curr_pos[0] + 1, curr_pos[1]]
+                                block_type = board[block_position[1]][block_position[0]]
+                            elif board[curr_pos[1]][curr_pos[0]] == "4":
+                                block_position = [curr_pos[0] - 1, curr_pos[1]]
+                                block_type = board[block_position[1]][block_position[0]]
+                            # else:
+                            #     # If the lazor will go through a block, then the lazor will stop.
+                            #     break
+                            # Using the Block class to figure out the new direction of the lazor after striking.
+                            new_dir_x, new_dir_y, pre_dir_x, pre_dir_y = Block(block_position, block_type).prop\
+                            (dir_x1, dir_y1, board[curr_pos[1]][curr_pos[0]])
+                            dir_x1 = new_dir_x
+                            dir_y1 = new_dir_y
+                            dir_x2 = pre_dir_x
+                            dir_y2 = pre_dir_y
+                            if dir_x1 != 0 and dir_y1 != 0:
+                                print('p3')
+                                new_x1 = curr_pos[0] + dir_x1
+                                new_y1 = curr_pos[1] + dir_y1
+                                p.append([new_x1, new_y1])
+                            else:
+                                p.append("end")
+                            if dir_x2 != 0 and dir_y2 != 0:
+                                print('p4')
+                                path_list.append([])
+                                path_list[-1].append([curr_pos[0], curr_pos[1]])
+                                path_list[-1].append([new_x, new_y])
+                                break
                     else:
-                        break
-            else:
-                # Lazors will stop when it reaching the boundary of the board.
-                break
+                        # Lazors will stop when it reaching the boundary of the board.
+                        p.append("end")
+                else:
+                    break
+        return path_list
 
-        return path
 
-test = 'mad_7.bff'
+test = 'mad_4.bff'
 read_file(test)
-# start = read_file(test)[3]
-# direction = read_file(test)[4]
-# board1 = read_file(test)[7]
+start = read_file(test)[3]
+direction = read_file(test)[4]
+board1 = read_file(test)[7]
 
 # print(direction)
 # print(start)
-# Block([7,3], "A").add_block(board1)
-# print(board1)
-# print(Lazor(start[0],direction[0][0], direction[0][1]).lazor_path(board1))
+Block([5,5], "C").add_block(board1)
+print(board1)
+print(Lazor(start[0],direction[0][0], direction[0][1]).lazor_path(board1))
 # read_file('tiny_5.bff')
 # print(read_file('dark_1.bff'))
