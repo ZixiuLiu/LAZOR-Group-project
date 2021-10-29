@@ -87,6 +87,14 @@ def read_file (file_name):
             board[l[1]][l[0]] = "L"
         for p in P_list:
             board[p[1]][p[0]] = "P"
+        # Mark the four sides of the fixed block with "1","2","3","4".
+        for i in range(len(board)-1):
+            for j in range(len(board[i])-1):
+                if board[i][j] == "A" or board[i][j] == "B" or board[i][j] == "C":
+                    board[i - 1][j] = "1"  # top
+                    board[i + 1][j] = "2"  # bottom
+                    board[i][j - 1] = "3"  # left
+                    board[i][j + 1] = "4"  # right
         # print(A_num, B_num, C_num, L_list, P_list, board_list)
     return A_num, B_num, C_num, L_point, L_direction, P_list, board_list, board
 
@@ -301,7 +309,8 @@ board1 = read_file(test)[7]
 
 # print(direction)
 # print(start)
-Block([5,5], "C").add_block(board1)
+Block([3, 1], "C").add_block(board1)
+Block([5, 5], "C").add_block(board1)
 print(board1)
 print(Lazor(start[0],direction[0][0], direction[0][1]).lazor_path(board1))
 # read_file('tiny_5.bff')
