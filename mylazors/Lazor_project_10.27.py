@@ -194,9 +194,28 @@ class Lazor:
     #     return board[pos_y][pos_x] != "1" and "2" and "3" and "4" 
     #     and board[newpos_y][newpos_x] != "1" and "2" and "3" and "4"
 
-    def check_in_block(self, x, y, edge):
-        return
-        # we can 分1234边讨论lazor在block里面走  return这个条件
+    def check_out_block(self, x, y, board, pos_x, pos_y):
+        '''
+        This function is aimd to check whether the lazor is reflecting in side the block or not.
+        input:
+        :param x: The current x direction of lazor
+        :param y: The current y direction of lazor
+        :param board: The board
+        :param pos_x: The current x position
+        :param pos_y: The current y position
+        output:
+        :return: If the lazor is out of the block, return True
+                 If the lazor is in the block, return False
+        '''
+        if board[pos_y][pos_x] == "1":
+            result = (y > 0)
+        if board[pos_y][pos_x] == "2":
+            result = (y < 0)
+        if board[pos_y][pos_x] == "3":
+            result = (x > 0)
+        if board[pos_y][pos_x] == "4":
+            result = (x < 0)
+        return result
 
     def lazor_path(self, board):
         start = self.start_point
@@ -224,44 +243,48 @@ class Lazor:
                             p.append([new_x, new_y])
                         else:
                             print('p2else')
-                            block_type = 0
-                            block_position = 0
-                            # if self.out_block(curr_pos[0], curr_pos[1], new_x, new_y, board):
-                            if board[curr_pos[1]][curr_pos[0]] == "1":
-                                block_position = [curr_pos[0], curr_pos[1] + 1]
-                                block_type = board[block_position[1]][block_position[0]]
-                            elif board[curr_pos[1]][curr_pos[0]] == "2":
-                                block_position = [curr_pos[0], curr_pos[1] - 1]
-                                block_type = board[block_position[1]][block_position[0]]
-                            elif board[curr_pos[1]][curr_pos[0]] == "3":
-                                block_position = [curr_pos[0] + 1, curr_pos[1]]
-                                block_type = board[block_position[1]][block_position[0]]
-                            elif board[curr_pos[1]][curr_pos[0]] == "4":
-                                block_position = [curr_pos[0] - 1, curr_pos[1]]
-                                block_type = board[block_position[1]][block_position[0]]
-                            # else:
-                            #     # If the lazor will go through a block, then the lazor will stop.
-                            #     break
-                            # Using the Block class to figure out the new direction of the lazor after striking.
-                            new_dir_x, new_dir_y, pre_dir_x, pre_dir_y = Block(block_position, block_type).prop\
-                            (dir_x1, dir_y1, board[curr_pos[1]][curr_pos[0]])
-                            dir_x1 = new_dir_x
-                            dir_y1 = new_dir_y
-                            dir_x2 = pre_dir_x
-                            dir_y2 = pre_dir_y
-                            if dir_x1 != 0 and dir_y1 != 0:
-                                print('p3')
-                                new_x1 = curr_pos[0] + dir_x1
-                                new_y1 = curr_pos[1] + dir_y1
-                                p.append([new_x1, new_y1])
+                            if self.check_out_block(dir_x1, dir_y1, board, curr_pos[0], curr_pos[1]):
+                                block_type = 0
+                                block_position = 0
+                                # if self.out_block(curr_pos[0], curr_pos[1], new_x, new_y, board):
+                                if board[curr_pos[1]][curr_pos[0]] == "1":
+                                    block_position = [curr_pos[0], curr_pos[1] + 1]
+                                    block_type = board[block_position[1]][block_position[0]]
+                                elif board[curr_pos[1]][curr_pos[0]] == "2":
+                                    block_position = [curr_pos[0], curr_pos[1] - 1]
+                                    block_type = board[block_position[1]][block_position[0]]
+                                elif board[curr_pos[1]][curr_pos[0]] == "3":
+                                    block_position = [curr_pos[0] + 1, curr_pos[1]]
+                                    block_type = board[block_position[1]][block_position[0]]
+                                elif board[curr_pos[1]][curr_pos[0]] == "4":
+                                    block_position = [curr_pos[0] - 1, curr_pos[1]]
+                                    block_type = board[block_position[1]][block_position[0]]
+                                # else:
+                                #     # If the lazor will go through a block, then the lazor will stop.
+                                #     break
+                                # Using the Block class to figure out the new direction of the lazor after striking.
+                                new_dir_x, new_dir_y, pre_dir_x, pre_dir_y = Block(block_position, block_type).prop\
+                                (dir_x1, dir_y1, board[curr_pos[1]][curr_pos[0]])
+                                dir_x1 = new_dir_x
+                                dir_y1 = new_dir_y
+                                dir_x2 = pre_dir_x
+                                dir_y2 = pre_dir_y
+                                if dir_x1 != 0 and dir_y1 != 0:
+                                    print('p3')
+                                    new_x1 = curr_pos[0] + dir_x1
+                                    new_y1 = curr_pos[1] + dir_y1
+                                    p.append([new_x1, new_y1])
+                                else:
+                                    p.append("end")
+                                if dir_x2 != 0 and dir_y2 != 0:
+                                    print('p4')
+                                    path_list.append([])
+                                    path_list[-1].append([curr_pos[0], curr_pos[1]])
+                                    path_list[-1].append([new_x, new_y])
                             else:
-                                p.append("end")
-                            if dir_x2 != 0 and dir_y2 != 0:
-                                print('p4')
-                                path_list.append([])
-                                path_list[-1].append([curr_pos[0], curr_pos[1]])
-                                path_list[-1].append([new_x, new_y])
-                                break
+                                # If lazors hit blocks from the inside of the block, the reflection won't happen
+                                # Just go straight
+                                p.append([new_x, new_y])
                     else:
                         # Lazors will stop when it reaching the boundary of the board.
                         p.append("end")
