@@ -194,6 +194,10 @@ class Lazor:
     #     return board[pos_y][pos_x] != "1" and "2" and "3" and "4" 
     #     and board[newpos_y][newpos_x] != "1" and "2" and "3" and "4"
 
+    def check_in_block(self, x, y, edge):
+        return
+        # we can 分1234边讨论lazor在block里面走  return这个条件
+
     def lazor_path(self, board):
         start = self.start_point
         path_list = [[start]]
