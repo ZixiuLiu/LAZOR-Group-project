@@ -401,7 +401,7 @@ def possible_boards(board_list, A_num, B_num, C_num):
     return all_block_possible_list, all_position_possible_list
 
 
-test = 'yarn_5.bff'
+test = 'tiny_5.bff'
 read_file(test)
 start = read_file(test)[3]
 direction = read_file(test)[4]
@@ -422,14 +422,3 @@ for i in range(len(T)):
     board_possible.append(board)
     for l in range(len(start)):
         print(Lazor(start[l], direction[l][0], direction[l][1]).lazor_path(board_possible[i]))
-
-
-# Block([3, 1], "A").add_block(board1)
-# Block([5, 3], "A").add_block(board1)
-# Block([1, 5], "A").add_block(board1)
-# Block([1, 3], "B").add_block(board1)
-# print(board1)
-# for i in range(len(start)):
-#     print(Lazor(start[i],direction[i][0], direction[i][1]).lazor_path(board1))
-# read_file('tiny_5.bff')
-# print(read_file('dark_1.bff'))
