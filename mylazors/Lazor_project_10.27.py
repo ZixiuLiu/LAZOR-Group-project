@@ -308,7 +308,7 @@ class Lazor:
         return path_list
 
 
-test = 'numbered_6.bff'
+test = 'showstopper_4.bff'
 read_file(test)
 start = read_file(test)[3]
 direction = read_file(test)[4]
@@ -316,8 +316,10 @@ board1 = read_file(test)[7]
 
 # print(direction)
 # print(start)
-Block([1, 7], "B").add_block(board1)
-Block([1, 5], "C").add_block(board1)
+Block([3, 1], "A").add_block(board1)
+Block([5, 3], "A").add_block(board1)
+Block([1, 5], "A").add_block(board1)
+Block([1, 3], "B").add_block(board1)
 print(board1)
 for i in range(len(start)):
     print(Lazor(start[i],direction[i][0], direction[i][1]).lazor_path(board1))
