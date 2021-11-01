@@ -401,24 +401,27 @@ def possible_boards(board_list, A_num, B_num, C_num):
     return all_block_possible_list, all_position_possible_list
 
 
+def possible_path(block_list, position_list, board):
+    board_possible = []
+    lazor_possible = []
+    for i in range(len(block_list)):
+        board1 = board.copy()
+        for j in range(len(block_list[i])):
+            Block(position_list[i][j], block_list[i][j]).add_block(board1)
+        board_possible.append(board1)
+        for l in range(len(start)):
+            lazor_possible.append((Lazor(start[l], direction[l][0], direction[l][1]).lazor_path(board_possible[i])))
+    return lazor_possible
+
 test = 'tiny_5.bff'
 read_file(test)
 start = read_file(test)[3]
 direction = read_file(test)[4]
-board1 = read_file(test)[7]
-# print(board1)
+board = read_file(test)[7]
+block_list, position_list = possible_boards(read_file(test)[6], read_file(test)[0], read_file(test)[1],
+                                            read_file(test)[2])
+possible = possible_path(block_list, position_list, board=read_file(test)[7])
 
 
-T, W = possible_boards(read_file(test)[6], read_file(test)[0], read_file(test)[1], read_file(test)[2])
-# print(T)
-# print(W)
-#
-board_possible = []
-for i in range(len(T)):
-    board1 = read_file(test)[7]
-    board = board1.copy()
-    for j in range(len(T[i])):
-        Block(W[i][j], T[i][j]).add_block(board)
-    board_possible.append(board)
-    for l in range(len(start)):
-        print(Lazor(start[l], direction[l][0], direction[l][1]).lazor_path(board_possible[i]))
+
+
