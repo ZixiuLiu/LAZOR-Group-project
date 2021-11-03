@@ -313,7 +313,7 @@ read_file(test)
 start = read_file(test)[3]
 direction = read_file(test)[4]
 board1 = read_file(test)[7]
-
+print(read_file(test)[0])
 # print(direction)
 # print(start)
 Block([3, 1], "A").add_block(board1)
@@ -325,3 +325,4 @@ for i in range(len(start)):
     print(Lazor(start[i],direction[i][0], direction[i][1]).lazor_path(board1))
 # read_file('tiny_5.bff')
 # print(read_file('dark_1.bff'))
+
