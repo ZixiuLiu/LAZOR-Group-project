@@ -1,4 +1,4 @@
-# import time
+import time
 # from typing import List
 # import sympy.utilities.iterables
 from sympy.utilities.iterables import multiset_permutations
@@ -9,6 +9,7 @@ from sympy.utilities.iterables import multiset_permutations
 # 3: Block C
 # -1: Unable to place
 
+time_start = time.time()
 def read_file (file_name):
     A_num = 0 # Initialize the # of A, B and C blocks as 0
     B_num = 0
@@ -413,31 +414,33 @@ def possible_path(block_list, position_list, board):
             lazor_possible.append((Lazor(start[l], direction[l][0], direction[l][1]).lazor_path(board_possible[i])))
     return lazor_possible
 
-test = 'tiny_5.bff'
+test = 'mad_7.bff'
 read_file(test)
 start = read_file(test)[3]
 direction = read_file(test)[4]
-<<<<<<< HEAD
+
 board1 = read_file(test)[7]
-print(read_file(test)[0])
+# print(read_file(test)[0])
 # print(direction)
 # print(start)
-Block([3, 1], "A").add_block(board1)
-Block([5, 3], "A").add_block(board1)
-Block([1, 5], "A").add_block(board1)
-Block([1, 3], "B").add_block(board1)
+# Block([3, 1], "A").add_block(board1)
+# Block([5, 3], "A").add_block(board1)
+# Block([1, 5], "A").add_block(board1)
+# Block([1, 3], "B").add_block(board1)
 print(board1)
 for i in range(len(start)):
     print(Lazor(start[i],direction[i][0], direction[i][1]).lazor_path(board1))
 # read_file('tiny_5.bff')
 # print(read_file('dark_1.bff'))
-=======
+
 board = read_file(test)[7]
 block_list, position_list = possible_boards(read_file(test)[6], read_file(test)[0], read_file(test)[1],
                                             read_file(test)[2])
 possible = possible_path(block_list, position_list, board=read_file(test)[7])
+print(possible)
+time_end = time.time()
+print(time_start - time_end)
 
 
 
->>>>>>> 64a7acc963e1da1d2e28e31f7ca3b80ce65c34ae
 
