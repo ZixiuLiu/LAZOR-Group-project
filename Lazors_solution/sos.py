@@ -1,7 +1,9 @@
 import time
+import copy
 # from typing import List
 # import sympy.utilities.iterables
 from sympy.utilities.iterables import multiset_permutations
+
 # Lazor project
 # 0: Free to place
 # 1: Block A
@@ -10,17 +12,19 @@ from sympy.utilities.iterables import multiset_permutations
 # -1: Unable to place
 
 time_start = time.time()
-def read_file (file_name):
-    A_num = 0 # Initialize the # of A, B and C blocks as 0
+
+
+def read_file(file_name):
+    A_num = 0  # Initialize the # of A, B and C blocks as 0
     B_num = 0
     C_num = 0
-    L_list = [] 
+    L_list = []
     P_list = []
     board_list = []
     i = 0
     j = 0
     file_read_list = []
-    with open (file_name, 'r') as file:
+    with open(file_name, 'r') as file:
         for line in file.readlines():
             file_read_list.append(line)
             i += 1
@@ -48,10 +52,10 @@ def read_file (file_name):
                 P_list.append([int(P_list_temp[0]), int(P_list_temp[1])])
         while (True):
             board_list_temp_row = []
-            if (file_read_list[start_loc+j] == 'GRID STOP\n'):
+            if (file_read_list[start_loc + j] == 'GRID STOP\n'):
                 break
             else:
-                board_list_temp = file_read_list[start_loc+j].split()
+                board_list_temp = file_read_list[start_loc + j].split()
                 for k in range(0, len(board_list_temp)):
                     board_list_temp_row.append(board_list_temp[k])
                 board_list.append(board_list_temp_row)
@@ -77,7 +81,7 @@ def read_file (file_name):
         column = len(board_list[0])
         for i in range(2 * row + 1):
             if i % 2 == 0:
-                board.append(['0'] * (2 * column +1))
+                board.append(['0'] * (2 * column + 1))
             else:
                 row_list = []
                 for j in range(2 * column + 1):
@@ -101,6 +105,7 @@ def read_file (file_name):
         #             board[i][j + 1] = "4"  # right
         # print(A_num, B_num, C_num, L_list, P_list, board_list)
     return A_num, B_num, C_num, L_point, L_direction, P_list, board_list, board
+
 
 class Block:
     '''
@@ -149,7 +154,7 @@ class Block:
         output:
         The new x and y direction of lazor
         '''
-        
+
         if self.b_type == "A":
             if face == "1" or face == "2":
                 new_la_x1 = lazor_x
@@ -213,7 +218,7 @@ class Lazor:
     #     output:
     #     The result of whether lazors go through the block or not.
     #     '''
-    #     return board[pos_y][pos_x] != "1" and "2" and "3" and "4" 
+    #     return board[pos_y][pos_x] != "1" and "2" and "3" and "4"
     #     and board[newpos_y][newpos_x] != "1" and "2" and "3" and "4"
 
     def check_out_block(self, x, y, board, pos_x, pos_y):
@@ -290,8 +295,8 @@ class Lazor:
                                     block_position = [curr_pos[0] - 1, curr_pos[1]]
                                     block_type = board[block_position[1]][block_position[0]]
                                 # Using the Block class to figure out the new direction of the lazor after striking.
-                                new_dir_x, new_dir_y, pre_dir_x, pre_dir_y = Block(block_position, block_type).prop\
-                                (dir_x1, dir_y1, board[curr_pos[1]][curr_pos[0]])
+                                new_dir_x, new_dir_y, pre_dir_x, pre_dir_y = Block(block_position, block_type).prop \
+                                    (dir_x1, dir_y1, board[curr_pos[1]][curr_pos[0]])
                                 dir_x1 = new_dir_x
                                 dir_y1 = new_dir_y
                                 dir_x2 = pre_dir_x
@@ -322,125 +327,22 @@ class Lazor:
         return path_list
 
 
-def possible_boards(board_list, A_num, B_num, C_num):
-    moved_block = []  # get a list of ABC blocks, eg: ['A', 'B', 'C']
-    for i in range(A_num):
-        moved_block.append('A')
-    for i in range(B_num):
-        moved_block.append('B')
-    for i in range(C_num):
-        moved_block.append('C')
-
-    long_block_list = []  # eg: ['o', 'o', 'x', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'x', 'o', 'x', 'o']
-    for i in board_list:
-        for j in i:
-            long_block_list.append(j)
-
-    fixed_list = []
-    fixed_position = []
-    o_list = []
-
-    for i in range(len(long_block_list)):
-        if long_block_list[i] == 'x':
-            fixed_list.append('x')
-            fixed_position.append(i)
-        elif long_block_list[i] == 'A':
-            fixed_list.append('A')
-            fixed_position.append(i)
-        elif long_block_list[i] == 'B':
-            fixed_list.append('B')
-            fixed_position.append(i)
-        elif long_block_list[i] == 'C':
-            fixed_list.append('C')
-            fixed_position.append(i)
-        else:
-            o_list.append(long_block_list[i])
-    for i in moved_block:
-        o_list.pop()
-    for i in moved_block:
-        o_list.append(i)
-
-    moved_block_list = []    # the list with all possible arrangements of moved blocks
-    for i in multiset_permutations(o_list):
-        moved_block_list.append(i)
-    if fixed_list is not None:
-        for i in range(len(fixed_list)):
-            for li in moved_block_list:
-                li.insert(fixed_position[i], fixed_list[i])
-    # get 'moved_block_list', but every board was a list
-    # every list in moved_block_list need to return a coordinate
-    # change the list into coordinate
-    row = len(board_list)
-    column = len(board_list[0])
-    # format_list = []
-    # for a_li in moved_block_list:
-    #     new_li = []
-    #     for i in range(0, len(li), column):
-    #         new_li.append(li[i: i + 3])
-    #     format_list.append(new_li)
-    # print(format_list)
-    # get a format_list, format like board_list
-    # below is to generate coordinate list
-    # for one_li in format_list:
-    all_block_possible_list = []
-    all_position_possible_list = []
-    for ali in moved_block_list:
-        b_l = []
-        p_l = []
-        for i in range(len(ali)):
-            if ali[i] == 'A':
-                b_l.append(ali[i])
-                p_l.append(((i % column) * 2 + 1, (i // column) * 2 + 1))
-            if ali[i] == 'B':
-                b_l.append(ali[i])
-                p_l.append(((i % column) * 2 + 1, (i // column) * 2 + 1))
-            if ali[i] == 'C':
-                b_l.append(ali[i])
-                p_l.append(((i % column) * 2 + 1, (i // column) * 2 + 1))
-        all_block_possible_list.append(b_l)
-        all_position_possible_list.append(p_l)
-    return all_block_possible_list, all_position_possible_list
-
-
-def possible_path(block_list, position_list, board):
-    board_possible = []
-    lazor_possible = []
-    for i in range(len(block_list)):
-        board1 = board.copy()
-        for j in range(len(block_list[i])):
-            Block(position_list[i][j], block_list[i][j]).add_block(board1)
-        board_possible.append(board1)
-        for l in range(len(start)):
-            lazor_possible.append((Lazor(start[l], direction[l][0], direction[l][1]).lazor_path(board_possible[i])))
-    return lazor_possible
-
 test = 'mad_7.bff'
 read_file(test)
 start = read_file(test)[3]
 direction = read_file(test)[4]
-
-board1 = read_file(test)[7]
+p_list = read_file(test)[5]
+print(p_list)
 # print(read_file(test)[0])
 # print(direction)
 # print(start)
-# Block([3, 1], "A").add_block(board1)
-# Block([5, 3], "A").add_block(board1)
+# Block([5, 1], "A").add_block(board1)
+# Block([7, 3], "A").add_block(board1)
 # Block([1, 5], "A").add_block(board1)
-# Block([1, 3], "B").add_block(board1)
-print(board1)
+# Block([5, 5], "A").add_block(board1)
+# Block([7, 7], "A").add_block(board1)
+# Block([5, 9], "A").add_block(board1)
+board1 = [['0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0'], ['0', 'o', '0', 'o', '3', 'A', '4', 'o', '0', 'o', '0'], ['0', '0', '0', '0', '0', '2', '0', '1', '0', '0', '0'], ['0', 'o', '0', 'o', '0', 'o', '3', 'A', '4', 'o', '0'], ['0', '1', '0', '0', '0', '1', '0', '2', '0', '0', '0'], ['3', 'A', '4', 'o', '3', 'A', '4', 'o', '0', 'x', '0'], ['0', '2', '0', '0', '0', '2', '0', '1', '0', '0', '0'], ['0', 'o', '0', 'o', '0', 'o', '3', 'A', '4', 'o', '0'], ['0', '0', '0', '0', '0', '1', '0', '2', '0', '0', '0'], ['0', 'o', '0', 'o', '3', 'A', '4', 'o', '0', 'o', '0'], ['0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0']]
+# print(board1)
 for i in range(len(start)):
     print(Lazor(start[i],direction[i][0], direction[i][1]).lazor_path(board1))
-# read_file('tiny_5.bff')
-# print(read_file('dark_1.bff'))
-
-board = read_file(test)[7]
-block_list, position_list = possible_boards(read_file(test)[6], read_file(test)[0], read_file(test)[1],
-                                            read_file(test)[2])
-possible = possible_path(block_list, position_list, board=read_file(test)[7])
-print(possible)
-time_end = time.time()
-print(time_start - time_end)
-
-
-
-
