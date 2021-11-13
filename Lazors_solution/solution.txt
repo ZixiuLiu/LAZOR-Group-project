@@ -1,0 +1,12 @@
+This is the solution of the board you choose:mad_7.bff
+
+o o A o o 
+
+o o o A o 
+
+A o A o x 
+
+o o o A o 
+
+o o A o o 
+

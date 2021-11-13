@@ -1,56 +1,94 @@
 import time
 import copy
-# from typing import List
-# import sympy.utilities.iterables
 from sympy.utilities.iterables import multiset_permutations
-# Lazor project
-# 0: Free to place
-# 1: Block A
-# 2: Block B
-# 3: Block C
-# -1: Unable to place
 
 time_start = time.time()
 def read_file (file_name):
-    A_num = 0 # Initialize the # of A, B and C blocks as 0
+    '''
+    This function is for read and extract the information in .bff file.
+
+    **Parameters**
+        
+        file_name: *file*
+            The .bff file
+    
+    **Output**
+
+         A_num, B_num, C_num: *int*
+            The number of blocks of A, B and C
+        L_point, L_direction: *list*
+            The coordinate and directions of starts
+        P_list: *list*
+            The coordinate of destinations
+        board_list: *list*
+            The board condition include free positions, occupied positions and fixed blocks
+        board: *list*
+            The extended board matrix. i.e. extended every single "o" or "x" or fixed block to a 3x3 matrix
+            e.g. "0" "0" "0"
+                 "0" "o" "0"
+                 "0" "0" "0"
+    '''
+    # Initialize the # of A, B and C blocks as 0
+    A_num = 0 
     B_num = 0
     C_num = 0
+    # Initialize the starting and destiation list as empty 
     L_list = [] 
     P_list = []
     board_list = []
+    # Initialize the loop index (i and j)
     i = 0
     j = 0
+    # Initialize the list for storing each line in .bff file
     file_read_list = []
+    # Start to open file and read lines
     with open (file_name, 'r') as file:
         for line in file.readlines():
+            # Store each line as a list
             file_read_list.append(line)
+            # Locate the 'GRID START' line and store the location as start_loc
+            # The board abstract process will start later out side this loop
             i += 1
             if (line == 'GRID START\n'):
                 start_loc = i
+            # If the line starts with a 'A', extract the number behind it in this line
+            # The reason why we use len(line) == 4 is because when the grid starts with A, the grid will be
+            # recognized as the number of A and lead to error
             if (line[0] == 'A' and len(line) == 4):
+                # Strip and split the line
                 A_list_temp = line.strip().split(' ')
+                # Remove the string 'A' in the line and leaves only the number(string format)
                 A_list_temp.remove('A')
+                # Append the number(string format) as a int into the output variable
                 A_num = int(A_list_temp[0])
+            # If the line starts with a 'B', extract the number behind it in this line
             if (line[0] == 'B' and len(line) == 4):
                 B_list_temp = line.strip().split(' ')
                 B_list_temp.remove('B')
                 B_num = int(B_list_temp[0])
+            # If the line starts with a 'C', extract the number behind it in this line
             if (line[0] == 'C' and len(line) == 4):
                 C_list_temp = line.strip().split(' ')
                 C_list_temp.remove('C')
                 C_num = int(C_list_temp[0])
+            # If the line starts with a 'L', extract the number behind it in this line
             if (line[0] == 'L'):
                 L_list_temp = line.strip().split(' ')
                 L_list_temp.remove('L')
+                # The four value includes two coordinates and two ditrctions
                 L_list.append([int(L_list_temp[0]), int(L_list_temp[1]), int(L_list_temp[2]), int(L_list_temp[3])])
+            # If the line starts with a 'P', extract the number behind it in this line
             if (line[0] == 'P'):
                 P_list_temp = line.strip().split(' ')
                 P_list_temp.remove('P')
                 P_list.append([int(P_list_temp[0]), int(P_list_temp[1])])
+        # This loop is for extract the board condition according to the location of 'GRID START'
         while (True):
             board_list_temp_row = []
+            # If the grid ends, jump out of this infinity loop
             if (file_read_list[start_loc+j] == 'GRID STOP\n'):
                 break
+            # If the line is between 'grid start' and 'grid stop', store the board condition
             else:
                 board_list_temp = file_read_list[start_loc+j].split()
                 for k in range(0, len(board_list_temp)):
@@ -87,27 +125,17 @@ def read_file (file_name):
                     else:
                         row_list.append(board_list[(i - 1) // 2][(j - 1) // 2])
                 board.append(row_list)
-        # Mark the starting point and target end point lazor with "L" and "P", respectively.
-        # for l in L_point:
-        #     board[l[1]][l[0]] = "L"
-        # for p in P_list:
-        #     board[p[1]][p[0]] = "P"
-        # Mark the four sides of the fixed block with "1","2","3","4".
-        # for i in range(len(board)-1):
-        #     for j in range(len(board[i])-1):
-        #         if board[i][j] == "A" or board[i][j] == "B" or board[i][j] == "C":
-        #             board[i - 1][j] = "1"  # top
-        #             board[i + 1][j] = "2"  # bottom
-        #             board[i][j - 1] = "3"  # left
-        #             board[i][j + 1] = "4"  # right
-        # print(A_num, B_num, C_num, L_list, P_list, board_list)
     return A_num, B_num, C_num, L_point, L_direction, P_list, board_list, board
 
 class Block:
     '''
-    This class is aimed to implement specific movement and functions of different blocks
-    '''
+    This class create a wrapper for functions which implement specific movement and functions of different blocks
 
+    **Parameters**
+
+        list and string: *position* and *b_type*
+            The position and type of blocks that have to be wrapped
+    '''
     def __init__(self, position, b_type):
         self.position = position
         self.b_type = b_type
@@ -115,10 +143,15 @@ class Block:
     def add_block(self, board):
         '''
         This function will allow users to move blocks to certain position
-        input:
-        The matrix of the board and the block type
-        output:
-        A matrix with specific blocks and each side of the block presenting as "1","2","3,"4".
+
+        **Parameters**
+
+            board: *string*
+                The matrix of the board and the block type
+
+        **Returns**
+
+            *list*: A matrix with specific blocks and each side of the block presenting as "1","2","3,"4".
         '''
 
         position = self.position
@@ -127,11 +160,16 @@ class Block:
         if board[pos_y][pos_x] != "x":
             board[pos_y][pos_x] = self.b_type
             if board[pos_y][pos_x] != "C":
+                # If the block is C
+                # make sure that the four face of the block is exactly "1", "2", "3" and "4"
+                # So that the lazor won't recognize a wrong face of a block for further function of lazor
                 board[pos_y - 1][pos_x] = "1"  # top
                 board[pos_y + 1][pos_x] = "2"  # bottom
                 board[pos_y][pos_x - 1] = "3"  # left
                 board[pos_y][pos_x + 1] = "4"  # right
             else:
+                # if the block is not C
+                # The face number should keep unchanged if the block is put next to a existing block
                 if board[pos_y - 1][pos_x] != "2":
                     board[pos_y - 1][pos_x] = "1"  # top
                 if board[pos_y + 1][pos_x] != "1":
@@ -145,33 +183,49 @@ class Block:
     def prop(self, lazor_x, lazor_y, face):
         '''
         This function is able to setting different properties of different kind of blocks.
-        input:
-        The x and y direction of the lazor and the face of lazor contacting with a block.
-        output:
-        The new x and y direction of lazor
+
+        **Parameters**
+
+            lazor_x: *int*
+                The x direction of the lazor. i.e. 1 or -1
+            lazor_y: *int*
+                The y direction of the lazor. i.e. 1 or -1
+            face: *int*
+                The face of lazor contacting with a block. i.e. 1 or 2 or 3 or 4
+
+        **Returns**
+
+            *int*: The new x and y direction of lazor and the previous x and y direction of lazor.
         '''
-        
         if self.b_type == "A":
+            # A block have the property of reflection
             if face == "1" or face == "2":
                 new_la_x1 = lazor_x
                 new_la_y1 = (-1) * lazor_y
             elif face == "3" or face == "4":
                 new_la_x1 = (-1) * lazor_x
                 new_la_y1 = lazor_y
+            # direction change after striking
+            # the original direction disappear
             new_la_x2 = 0
             new_la_y2 = 0
         elif self.b_type == "B":
+            # B block have the property of absorption
+            # new direction and original direction both become 0
             new_la_x1 = 0
             new_la_y1 = 0
             new_la_x2 = 0
             new_la_y2 = 0
         elif self.b_type == "C":
+            # A block have the property of refraction
+            # direction change after striking
             if face == "1" or face == "2":
                 new_la_x1 = lazor_x
                 new_la_y1 = (-1) * lazor_y
             elif face == "3" or face == "4":
                 new_la_x1 = (-1) * lazor_x
                 new_la_y1 = lazor_y
+            # the original direction keeps
             new_la_x2 = lazor_x
             new_la_y2 = lazor_y
 
@@ -180,10 +234,17 @@ class Block:
 
 class Lazor:
     '''
-    This class wraps functions which are related to all the points and directions of lazors. It allows
-    the laser beam to parse through the board and take suitable actions of contacting a particular type of block.
-    '''
+    This class create a wrapper for functions which implement lazor route and specific end condition for lazor
 
+    **Parameters**
+
+        list : *start_point*
+            The coordinate of the lazor start point.
+        int : *dir_x*
+            The initial x direction of lazor
+        int : *dir_y*
+            The initial y direction of lazor
+    '''
     def __init__(self, start_point, dir_x, dir_y):
         self.start_point = start_point
         self.dir_x = dir_x
@@ -191,52 +252,63 @@ class Lazor:
 
     def pos_chk(self, x, y, x_boundary, y_boundary):
         '''
-        To check whether the current position of lazor is still within the grid or not.
-        input:
-        param x: The x direction of lazor
-        param y: The y direction of lazor
-        param boundary: The boundary of the board
-        output:
-        Ture or False
+        This function is able to check whether the current position of lazor is still within the grid or not.
+
+        **Parameters**
+
+            x: *int*
+                The x coordinate to check if it resides within the board
+            y: *int*
+                The y coordinate check if it resides within the board
+            x_boundary: *int*
+                The x coordinate boundary of the board
+            y_boundary: *int*
+                The y coordinate boundary of the board
+
+        **Returns**
+
+            valid: *bool*
+                Whether the coordiantes are valid (True) or not (False).
         '''
-
         return x >= 0 and x < x_boundary and y >= 0 and y < y_boundary
-
-    # def out_block(self, pos_x, pos_y, newpos_x, newpos_y, board):
-    #     '''
-    #     This function is able to make sure that the lazor won't go through a block on the board.
-    #     input:
-    #     :param pos_x: The current x coordinate of lazor
-    #     :param pos_y: The current y coordinate of lazor
-    #     :param newpos_x: The new x coordinate of lazor
-    #     :param newpos_y: The new y coordinate of lazor
-    #     :param board: The board
-    #     output:
-    #     The result of whether lazors go through the block or not.
-    #     '''
-    #     return board[pos_y][pos_x] != "1" and "2" and "3" and "4" 
-    #     and board[newpos_y][newpos_x] != "1" and "2" and "3" and "4"
 
     def check_out_block(self, x, y, board, pos_x, pos_y):
         '''
-        This function is aimd to check whether the lazor is reflecting inside the block or not.
-        input:
-        :param x: The current x direction of lazor
-        :param y: The current y direction of lazor
-        :param board: The board
-        :param pos_x: The current x position
-        :param pos_y: The current y position
-        output:
-        :return: If the lazor is out of the block, return True
-                 If the lazor is in the block, return False
+        This function is able to check whether the current position of lazor is out of the block or not.
+
+        **Parameters**
+
+            x: *int*
+                The current x direction of lazor
+            y: *int*
+                The current y direction of lazor
+            board: *list*
+                The board matrix
+            pos_x: *int*
+                The x coordinate of current position
+            pos_y: *int*
+                The y coordinate of current position
+
+        **Returns**
+
+            valid: *bool*
+                Whether the direction is from out of the block (True) or not (False).
         '''
         if board[pos_y][pos_x] == "1":
+            # if the lazor strikes the block at face "1" from outside
+            # the y direction of the lazor should be positive
             result = (y > 0)
         if board[pos_y][pos_x] == "2":
+            # if the lazor strikes the block at face "2" from outside
+            # the y direction of the lazor should be negative
             result = (y < 0)
         if board[pos_y][pos_x] == "3":
+            # if the lazor strikes the block at face "3" from outside
+            # the x direction of the lazor should be positive
             result = (x > 0)
         if board[pos_y][pos_x] == "4":
+            # if the lazor strikes the block at face "4" from outside
+            # the x direction of the lazor should be negative
             result = (x < 0)
         return result
 
@@ -247,10 +319,16 @@ class Lazor:
         The lazor will be absorbed when it hit block B
         The lazor will reflect and refract when it hit block C
         This fucntion allow lazors to change direction when hit certain type of bolcks and record the new route.
-        input:
-        :param board: The board matrix
-        output:
-        :return: Lazor path list containing different route list of lazors.
+
+        **Parameters**
+
+            board: *list*
+                The board matrix
+
+        **Returns**
+
+            path_list: *list*
+                Lazor path list containing different route list of lazors.
         '''
         start = self.start_point
         path_list = [[start]]
@@ -275,7 +353,11 @@ class Lazor:
                             # the lazor can be longer for one step.
                             p.append([new_x, new_y])
                         else:
+                            # if the current position of the lazor is on the side of a block.
                             if self.check_out_block(dir_x1, dir_y1, board, curr_pos[0], curr_pos[1]):
+                                # If lazors hit blocks from the outside of the block
+                                # find out which face the lazor strike at
+                                # locate the corresponding block and read it's type
                                 block_type = 0
                                 block_position = 0
                                 if board[curr_pos[1]][curr_pos[0]] == "1":
@@ -324,6 +406,28 @@ class Lazor:
 
 
 def possible_boards(board_list, A_num, B_num, C_num):
+    '''
+    This function will enumerate all possible boards for the given boards after inputting
+    all blocks, such as A, B, C.
+
+    **Parameters**
+
+        board_list: *list*
+            list consist lists of blocks, obtained from read_file function
+        A_num: *int*
+            numbers of moved A blocks
+        B_num: *int*
+            numbers of moved B blocks
+        C_num: *int*
+            numbers of moved C blocks
+
+    **Returns**
+
+        all_block_possible_list: *list*
+            the possible block matrixes and all placement of blocks insdead of 'x' and 'o'.
+        all_position_possible_list: *list*
+            all the corresponding position coordinate of each block in each possible permutation.
+    '''
     moved_block = []  # get a list of ABC blocks, eg: ['A', 'B', 'C']
     for i in range(A_num):
         moved_block.append('A')
@@ -377,16 +481,8 @@ def possible_boards(board_list, A_num, B_num, C_num):
     row = len(board_list)
     column = len(board_list[0])
 
-    # format_list = []
-    # for a_li in moved_block_list:
-    #     new_li = []
-    #     for i in range(0, len(li), column):
-    #         new_li.append(li[i: i + 3])
-    #     format_list.append(new_li)
-    # print(format_list)
     # get a format_list, format like board_list
     # below is to generate coordinate list
-    # for one_li in format_list:
     all_block_possible_list = []
     all_position_possible_list = []
     for ali in moved_block_list:
@@ -409,6 +505,28 @@ def possible_boards(board_list, A_num, B_num, C_num):
 
 
 def possible_path(test, block_list, position_list):
+    '''
+    This function will list and store all the lazor route of each possible block setted board permutation.
+
+    **Parameters**
+
+        test: *string*
+            the file name which users want to read
+        block_list: *list*
+            the possible block matrixes and all placement of blocks insdead of 'x' and 'o'.
+            the first output we get from possible_board function
+        position_list: *list*
+            all the corresponding position coordinate of each block in each possible permutation.
+            the second output we get from possible_board function
+
+    **Returns**
+
+        lazor_possible: *list*
+            the possible block matrixes and all placement of blocks insdead of 'x' and 'o'.
+        board_possible: *list*
+            all the corresponding possible board Permutation.
+
+    '''
     board_possible = []
     lazor_possible_temp = []
     start = read_file(test)[3]
@@ -417,13 +535,18 @@ def possible_path(test, block_list, position_list):
         board = read_file(test)[7]
         board1 = board.copy()
         for j in range(len(block_list[i])):
+            # Using Block class to set every blocks in one possible permutation into the board
             Block(position_list[i][j], block_list[i][j]).add_block(board1)
+        # get every possible board permutations
         board_possible.append(board1)
         lazor_temp = []
         for l in range(len(start)):
+            # To deal with lazors which have more than one start point
+            # Using Lazor class to store every routes of lazors in each possible board permutation
             lazor_temp.append((Lazor(start[l], direction[l][0], direction[l][1]).lazor_path(board1)))
         lazor_possible_temp.append(lazor_temp)
     lazor_possible =[]
+    # merge the two or more lazor routes which produced by corresponding start points
     for a in range(len(lazor_possible_temp)):
         lazor_temp_1 = []
         for b in range(len(lazor_possible_temp[a])):
@@ -433,41 +556,104 @@ def possible_path(test, block_list, position_list):
 
 
 def final_check(lazor_possible, P_list, board_possible):
+    '''
+    
+    This function is for check all the probabilities and find the correct answer
+
+    **Parameters**
+        
+        lazor_possible: *list*
+            The list that store all the probablities of lazor coordinates
+        P_list: *list*
+            The list that store the destinations 
+        board_possible: *list*
+            The list that store all the board conditions
+
+    **Returns**
+
+        board_possible[i]: *list*
+            The board condition of correct soltion
+
+    '''
+    # For each probability
     for i in range(len(lazor_possible)):
+        # Copy the P_list as test_list
         test_list = copy.deepcopy(P_list)
+        # For each lazer path in each probability
         for j in range(len(lazor_possible[i])):
+            # For each point in each path in each probability
             for k in range(len(lazor_possible[i][j])):
+                # Check if the point is inside the copied list
                 if lazor_possible[i][j][k] in test_list:
+                    # If so, remove the found point from the copied list
                     test_list.remove(lazor_possible[i][j][k])
+        # If the copied list is empty, this is the correct solution, then return the corresponding board condition
         if test_list == []:
             return board_possible[i]
 
-def out_put(result):
-    i = 1
-    while i < len(result):
-        j = 1
-        while j < len(result[i]):
-            print(result[i][j], end = ' ')
-            j += 2
-        print('\n')
-        i += 2
+def out_put(result, test):
+    '''
+    This function is to output a .txt file with a readable solution
+
+    ***Parameters***
+
+        result: **list**
+            The list storing the board condition of correct solution
+        test: **str**
+            The name of .bff file
+
+    ***Returns***
+
+        None
+    '''
+    # Write the file as solution.txt
+    with open ('solution.txt','w+') as file:
+        file.write('This is the solution of the board you choose:' + test)
+        file.write('\n\n')
+        # Extract the block information from the correct solution
+        # The bolck exist in every even numbered position, so i and j is added 2 in each loop
+        i = 1
+        while i < len(result):
+            j = 1
+            while j < len(result[i]):
+                print(result[i][j], end=' ')
+                file.write(result[i][j])
+                file.write(' ')
+                j += 2
+            print('\n')
+            file.write('\n\n')
+            i += 2
 
 
 def solve_game(test):
+
+    '''
+    This function is to pack all the functions into one
+
+    ***Parameters***
+
+        test: **str**
+            The name of .bff file
+
+    ***Returns***
+
+        None
+    '''
     read_file(test)
     p_list = read_file(test)[5]
-    T, W = possible_boards(read_file(test)[6], read_file(test)[0], read_file(test)[1], read_file(test)[2])
-    L, B = possible_path(test, T, W)
-    out_put(final_check(L, p_list, B))
+    # t : the first output of function possible_boards which is all_block_possible_list.
+    # w : the second output of function  which is corresponding all_position_possible_list.
+    t, w = possible_boards(read_file(test)[6], read_file(test)[0], read_file(test)[1], read_file(test)[2])
+    # l: the first output of function possible_path which is lazor_possible, board_possible.
+    # lazor_possible is all the lazor path point coordinate of each possible board.
+    # b : the second output of function possible_path which is board_possible.
+    # board_possible is all the corresponding possible board.
+    l, b = possible_path(test, t, w)
+    out_put(final_check(l, p_list, b), test)
 
 
 if __name__ == "__main__":
-    solve_game('mad_7.bff')
-
-
-time_end = time.time()
-print(time_end - time_start)
-
-
-
+    solve_game("mad_7.bff")
+    time_end = time.time()
+    print(time_end - time_start)
 
